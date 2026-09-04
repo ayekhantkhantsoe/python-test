@@ -1,46 +1,15 @@
-import json
-import time
-
-
-def load_todos():
-    try:
-        with open("data.json", "r", encoding="utf-8") as file:
-            saved_todos = json.load(file)
-
-        if not isinstance(saved_todos, list):
-            print("Error: data.json must contain a JSON list.")
-            return []
-
-        return saved_todos
-    except FileNotFoundError:
-        print("data.json was not found. Starting with an empty todo list.")
-        return []
-    except json.JSONDecodeError:
-        print("Error: data.json contains invalid JSON.")
-        return []
-    except OSError as error:
-        print("Could not read data.json:", error)
-        return []
-
+from service import add_todo, update_todo, delete_todo
+from storage import load_todos, save
 
 todos = load_todos()
 
-
-def save_todos():
-    try:
-        with open("data.json", "w", encoding="utf-8") as file:
-            json.dump(todos, file, indent=4)
-        return True
-    except OSError as error:
-        print("Could not save data.json:", error)
-        return False
-
-
-def add_todo():
-    todo = input("Enter a todo: ").strip()
+def handle_add_todo():
+    todo_text = input("Enter a todo: ").strip()
     status = input("Enter status ('in progress' or 'done'): ").strip().lower()
 
-    if not todo:
+    new_todo = add_todo(todos, todo_text, status)
+
+    if not todo_text:
         print("Todo cannot be empty.")
         return
 
@@ -48,24 +17,20 @@ def add_todo():
         print("Invalid status. Please enter 'in progress' or 'done'.")
         return
 
-    new_todo = {
-        "id": time.time_ns(),
-        "todo": todo,
-        "status": status,
-    }
-    todos.append(new_todo)
-    if save_todos():
+    if save(todos):
         print("Todo created:", new_todo)
 
-def update_todo():
-    todo_id = input("Enter the todo ID to update: ")
+def handle_update_todo():
+    todo_id = input("Enter the todo ID to update: ").strip()
+    new_todo_text = input("Enter the updated todo: ").strip()
+    new_status = input(
+        "Enter status ('in progress' or 'done'): "
+    ).strip().lower()
+
 
     for item in todos:
         if isinstance(item, dict) and str(item.get("id")) == todo_id:
-            new_todo = input("Enter the updated todo: ").strip()
-            new_status = input("Enter status ('in progress' or 'done'): ").strip().lower()
-
-            if not new_todo:
+            if not new_todo_text:
                 print("Todo cannot be empty.")
                 return
 
@@ -73,26 +38,29 @@ def update_todo():
                 print("Invalid status. Please enter 'in progress' or 'done'.")
                 return
 
-            item["todo"] = new_todo
-            item["status"] = new_status
-            if save_todos():
-                print("Todo updated:", item)
+            updated_todo = update_todo(
+                todos,
+                todo_id,
+                new_todo_text,
+                new_status,
+            )
+
+            if save(todos):
+                print("Todo updated:", updated_todo)
             return
 
     print("Todo ID not found.")
 
-def delete_todo():
-    todo_id = input("Enter the todo ID to delete: ")
+def handle_delete_todo():
+    todo_id = input("Enter the todo ID to delete: ").strip()
 
-    for item in todos:
-        if isinstance(item, dict) and str(item.get("id")) == todo_id:
-            todos.remove(item)
-            if save_todos():
-                print("Todo deleted:", item)
-            return
+    deleted_todo = delete_todo(todos, todo_id)
 
-    print("Todo ID not found.")
-    
+    if not deleted_todo:
+        return
+
+    if save(todos):
+        print("Todo deleted:", deleted_todo)
 
 try:
     print("1. Add todo")
@@ -102,11 +70,11 @@ try:
     choice = input("Choose an option: ").strip()
 
     if choice == "1":
-        add_todo()
+        handle_add_todo()
     elif choice == "2":
-        update_todo()
+        handle_update_todo()
     elif choice == "3":
-        delete_todo()
+        handle_delete_todo()
     elif choice == "4":
         print("Todo list:", todos)
     else:
@@ -114,4 +82,3 @@ try:
 except (KeyboardInterrupt, EOFError):
     print("\nInput cancelled.")
 
-print("Todo list:", todos)

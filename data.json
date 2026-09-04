@@ -1,10 +1,5 @@
 [
     {
-        "todo": "to workout",
-        "status": "in progress",
-        "id": 1
-    },
-    {
         "todo": "study",
         "status": "done",
         "id": 2
@@ -13,5 +8,10 @@
         "todo": "playing piano",
         "status": "in progress",
         "id": 3
+    },
+    {
+        "id": 1788525962941715200,
+        "todo": "Traning Chess",
+        "status": "done"
     }
 ]
