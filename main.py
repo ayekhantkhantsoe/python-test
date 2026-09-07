@@ -22,14 +22,14 @@ def handle_add_todo():
 
 def handle_update_todo():
     todo_id = input("Enter the todo ID to update: ").strip()
-    new_todo_text = input("Enter the updated todo: ").strip()
-    new_status = input(
-        "Enter status ('in progress' or 'done'): "
-    ).strip().lower()
-
 
     for item in todos:
         if isinstance(item, dict) and str(item.get("id")) == todo_id:
+            new_todo_text = input("Enter the updated todo: ").strip()
+            new_status = input(
+                "Enter status ('in progress' or 'done'): "
+            ).strip().lower()
+
             if not new_todo_text:
                 print("Todo cannot be empty.")
                 return
